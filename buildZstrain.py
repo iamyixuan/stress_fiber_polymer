@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-data_dir = 'new_sample/'
+data_dir = 'sample32/'
 filenames =  os.listdir(data_dir)
 def avgstrain(filename):
     temp = np.load(data_dir + filename,'r')

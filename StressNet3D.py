@@ -20,14 +20,14 @@ def weight_variable(shape):
 def bias_variable(shape):
 	initial = tf.constant(0.1, shape=shape)
 	return(tf.Variable(initial))
-	
+
 def conv3d(x, W, s=[1,1,1,1,1], padding='SAME'):
 	if (padding.upper() == 'VALID'):
 		return (tf.nn.conv3d(x,W,strides=s,padding='VALID'))
 	# SAME
 	return (tf.nn.conv3d(x,W,strides=s,padding='SAME'))
-	
-	
+
+
 def max_pool_3x3(x):
 	return(tf.nn.max_pool(x,ksize=[1,2,2,2,1],strides=[1,2,2,2,1],padding='SAME'))
 
@@ -80,7 +80,7 @@ def seblock(x, in_cn):
 def training_loss_writer(path, i, model_name, cur_mse, cur_mae):
 	if not os.path.exists(path):
 		os.makedirs(path)
-	
+
 	if i == 0:
 		with open(path + '/train_record_' + model_name + '.txt', 'w+') as text_file:
 			text_file.write('epoch:{:5d}   '.format(i))
@@ -127,7 +127,7 @@ def model(x):
 	w2 = weight_variable([3, 3, 32, 64])
 	b2 = bias_variable([64])
 	x2 = relu(bn(conv2d(x1, w2, s=[1, 2, 2, 1], padding='SAME') + b2)) # None*12*16*64
-	
+
 	'''
 	w3 = weight_variable([4, 4, 64, 128])
 	b3 = bias_variable([128])
@@ -149,7 +149,7 @@ def model(x):
 	x9 =  bn(relu(conv2d_transpose(x8, 64, kernel_size=(3, 3), stride=(2, 2), padding='SAME', activation_fn=None))) # None*12*16*64
 	# pad_x9 = tf.pad(x9, [[0 ,0], [1, 1], [1, 1], [0, 0]], 'CONSTANT')
 	x10 =  bn(relu(conv2d_transpose(x9, 32, kernel_size=(3, 3), stride=(2, 2), padding='SAME', activation_fn=None))) # None*24*32*32
-	
+
 	w4 = weight_variable([9, 9, 32, 1])
 	#b4 = bias_variable([1])
 	x11 = relu(conv2d(x10, w4)) # None*24*32*1
@@ -161,7 +161,7 @@ def main(argv = None):
 	#save_prefix = '../result/trained_models_rectangle_multiple_stressnet/'
 	f_name = '../data/all_data_m.npy'
 	save_prefix = '../result/trained_models_all_multiple_stressnet/'
-	
+
 	batch_size = 256
 	decay_steps = 4000
 	decay_rate = 0.995
@@ -180,7 +180,7 @@ def main(argv = None):
 	stress_min = np.min(np_input[:,resolution*5:resolution*6])
 	stress_max = np.max(np_input[:,resolution*5:resolution*6])
 	stree_statistic = [['mean','max','min'],[stress_mean,stress_min,stress_max]]
-	
+
 	np.random.shuffle(np_input)
 	np_input=np_input[:int(sample_rate * np.shape(np_input)[0]),:]
 	total_num = np.shape(np_input)[0]
@@ -197,14 +197,14 @@ def main(argv = None):
 	ys = tf.placeholder(tf.float32, shape=[None, resolution])
 	prediction_matrix, x10, x9, x3, x2, x1 = model(xs_reshape)
 	prediction = tf.reshape(prediction_matrix, shape=[-1,resolution])
-	
+
 	#metrics
 	mse = tf.losses.mean_squared_error(ys,prediction)
 	mae = tf.reduce_mean(tf.abs(tf.subtract(ys,prediction)))
 	#loss
 	loss = mse
 
-	#train rate    
+	#train rate
 	global_step = tf.Variable(0, trainable=False)
 	add_global = global_step.assign_add(1)
 	learning_rate = tf.train.exponential_decay(starter_learning_rate,
@@ -215,15 +215,15 @@ def main(argv = None):
 	train_step = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(loss)
 
 	#set GPU
-	config = tf.ConfigProto() 
+	config = tf.ConfigProto()
 	#config.gpu_options.per_process_gpu_memory_fraction = 0.9
 	config.gpu_options.allow_growth = True
 
 	'''
 	#set CPU
 	config = tf.ConfigProto(device_count={"CPU": 4}, # limit to num_cpu_core CPU usage
-					inter_op_parallelism_threads = 1,   
-					intra_op_parallelism_threads = 1,  
+					inter_op_parallelism_threads = 1,
+					intra_op_parallelism_threads = 1,
 					log_device_placement=True)
 	'''
 
@@ -243,7 +243,7 @@ def main(argv = None):
 		mae_train = np.zeros(n_epochs)
 		mae_test = np.zeros(n_epochs)
 		prediction_num = 50
-		prediction_history = np.zeros((prediction_num,resolution,n_epochs+1))		
+		prediction_history = np.zeros((prediction_num,resolution,n_epochs+1))
 		iter_num = num_train // batch_size
 		test_iter_num = test_num//batch_test
 		order = np.arange(num_train)
@@ -261,7 +261,7 @@ def main(argv = None):
 				x_batch_load_y = np_data_train[iter_train*batch_size:iter_train*batch_size+batch_size,resolution*2:resolution*3]
 				x_batch_boundry_x = np_data_train[iter_train*batch_size:iter_train*batch_size+batch_size,resolution*3:resolution*4]
 				x_batch_boundry_y = np_data_train[iter_train*batch_size:iter_train*batch_size+batch_size,resolution*4:resolution*5]
-				x_batch = np.stack((x_batch_shape, 
+				x_batch = np.stack((x_batch_shape,
 									x_batch_load_x,
 									x_batch_load_y,
 									x_batch_boundry_x,
@@ -286,7 +286,7 @@ def main(argv = None):
 				x_test_load_y = np_data_test[iter_test*batch_test:iter_test*batch_test+batch_test,resolution*2:resolution*3]
 				x_test_boundry_x = np_data_test[iter_test*batch_test:iter_test*batch_test+batch_test,resolution*3:resolution*4]
 				x_test_boundry_y = np_data_test[iter_test*batch_test:iter_test*batch_test+batch_test,resolution*4:resolution*5]
-				x_test = np.stack((x_test_shape, 
+				x_test = np.stack((x_test_shape,
 								x_test_load_x,
 								x_test_load_y,
 								x_test_boundry_x,
@@ -296,7 +296,7 @@ def main(argv = None):
 				test_total_mse += test_mse
 				test_total_mae += test_mae
 			prediction_input = x_test[0:prediction_num,:]
-			prediction_history[:,:,0] = y_test[0:prediction_num,:]			
+			prediction_history[:,:,0] = y_test[0:prediction_num,:]
 			prediction_history[:,:,epoch+1] = test_prediction[0:prediction_num,:]
 			mse_test[epoch] = test_total_mse/test_iter_num
 			mae_test[epoch] = test_total_mae/test_iter_num
@@ -311,10 +311,10 @@ def main(argv = None):
 				save_file = path + 'cnn_resnet'
 				saver.save(sess,save_file,global_step=epoch,write_meta_graph=True)
 				print('Session is saved: {}'.format(save_file))
-	
+
 			current_time = time.localtime()
 			print('Time current: ', time.strftime('%Y-%m-%d %H:%M:%S', current_time))
-	
+
 		print('Training is finished!')
 
 	np.save(save_prefix+'mse_train',mse_train)
@@ -324,7 +324,7 @@ def main(argv = None):
 	np.save(save_prefix+'prediction_input',prediction_input)
 	np.save(save_prefix+'prediction_history',prediction_history)
 	np.save(save_prefix+'stree_statistic',stree_statistic)
-	
+
 	print('Mean stress is:',stress_mean)
 	end_time = time.localtime()
 	print('Computing starts at: ', time.strftime('%Y-%m-%d %H:%M:%S', start_time))

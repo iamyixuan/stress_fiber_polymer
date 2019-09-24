@@ -14,7 +14,7 @@ starter_learning_rate = 1e-4
 train_ratio = 0.99
 reg_constant = 0.01
 # load the data
-train_path = './avgData/'
+train_path = './max_Data/'
 data = []
 
 for filename in os.listdir(train_path):
@@ -86,7 +86,7 @@ def residual_block(x, cn, scope_name, training):
 reset_graph() # this is very important for batchNorm to work
 
 X = tf.placeholder(tf.float32, shape = [None,32, 32, 32, 1], name = 'geometry')
-y = tf.placeholder(tf.float32, shape = [None, 6], name = 'strains')
+y = tf.placeholder(tf.float32, shape = [None, 3], name = 'strains')
 training = tf.placeholder_with_default(False, shape=(), name='training')
 
 
@@ -113,7 +113,7 @@ x10 = tf.layers.batch_normalization(x10, training = training)
 output = tf.layers.conv3d(x10, filters = 1, kernel_size = 3, padding = 'SAME', activation = tf.nn.relu)
 output = tf.layers.flatten(output)
 output = tf.layers.dense(output, units = 100, activation = tf.nn.relu)
-output = tf.layers.dense(output, units = 6, activation = None)
+output = tf.layers.dense(output, units = 3, activation = None)
 
 
 global_step = tf.Variable(0, trainable=False)
