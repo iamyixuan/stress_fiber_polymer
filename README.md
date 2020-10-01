@@ -4,7 +4,7 @@ The zip file `dataset.zip` in `data` folder contains 5321 2D microstructure slic
 
 Each slice is store in a `numpy` array with the filename being the corresponding coordinates values.
 
-## Load data:
+## Load data
 
 Use `numpy.load`
 
