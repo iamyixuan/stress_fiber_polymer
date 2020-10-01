@@ -2,7 +2,7 @@
 
 The zip file `dataset.zip` in `data` folder contains 5321 2D microstructure slices and the corresponding z-normal stress distribution. 
 
-Each slice is store in a `numpy` array with the filename being the corresponding coordinates values.
+Each slice is stored in a `numpy` array with the filename being the corresponding coordinates values.
 
 ## Load data
 
